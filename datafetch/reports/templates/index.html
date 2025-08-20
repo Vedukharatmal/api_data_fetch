@@ -14,8 +14,84 @@
             align-items: center;
             /* flex-wrap: wrap; */
             justify-content: space-around;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+        }
+
+        .container{
+            /* border: 2px solid black; */
+            margin: 25px 0;
+            padding: 25px;
+            display: flex;
+            /* flex-wrap: wrap; */
+            height: 400px;
+            width: 80%;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            overflow-x: auto;
+            background: #fee5cf;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #ef9185;
+            border-radius: 4px;
+        }
+
+        .container.show{
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        #results{
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            /* overflow-y: scroll;
+            overflow-x: scroll; */
+            opacity: 0; 
+            transform: translateY(20px); 
+            transition: all 0.5s ease-in-out;
+        }
+
+        #results.show{
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #results th, #results td{
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+
+        #results th{
+            background-color: #ef9185;
+            color: white;
+        }
+
+        #results tr:nth-child(even){
+            background-color: #dbdedf;
+        }
+
+        #results tr:nth-child(odd){
+            background-color: white;
+        }
+
+        #results tr:hover{
+            background-color: #f1f1f1;
         }
 
         .card{
@@ -112,10 +188,10 @@
         
     </div>
     
-    <div>
+    <div class="container">
         
         <h2>Results:</h2>
-        <table border="1" id="results">
+        <table id="results">
             <thead>
                 <tr><th>Name</th><th>Date</th><th>Value</th></tr>
             </thead>
@@ -132,7 +208,10 @@
             fetch(`/api/reports/?start_date=${start}&end_date=${end}`)
                 .then(res => res.json())
                 .then(data => {
-                    const tbody = document.querySelector("#results tbody");
+                    // const container = document.getElementsByClassName("conatainer")
+                    const container = document.querySelector(".container");
+                    const table = document.getElementById("results");
+                    const tbody = table.querySelector("#results tbody");
                     tbody.innerHTML = "";
                     data.forEach(item => {
                         tbody.innerHTML += `<tr>
@@ -141,6 +220,10 @@
                             <td>${item.value}</td>
                         </tr>`;
                     });
+                    
+                    container.classList.add("show");
+                    table.classList.add("show");
+
                 });
         }
     </script>
