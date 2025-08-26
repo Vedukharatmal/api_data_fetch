@@ -10,12 +10,13 @@
         body{
             background-color: #d3f1ff;
             display: flex;
-            /* flex-direction: column; */
+            flex-direction: column;
             align-items: center;
             /* flex-wrap: wrap; */
-            justify-content: space-around;
+            /* justify-content: space-around; */
             min-height: 100vh;
             margin: 0;
+            justify-content: center;
         }
 
         .container{
@@ -24,10 +25,13 @@
             padding: 25px;
             display: flex;
             /* flex-wrap: wrap; */
-            height: 400px;
-            width: 80%;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            /* height: 400px; */
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 400px;
+            /* align-items: center; */
             overflow-y: auto;
             overflow-x: auto;
             background: #fee5cf;
@@ -37,6 +41,7 @@
             transform: translateY(20px);
             transition: all 0.5s ease-in-out;
             pointer-events: none;
+            white-space: nowrap;
         }
 
         .container::-webkit-scrollbar {
@@ -54,12 +59,22 @@
             pointer-events: auto;
         }
 
-        #results{
-            margin: 20px auto;
+        .tables-wrapper {
+            display: flex;
+            flex-direction: row;   
+            gap: 20px;             
+            flex-wrap: nowrap;       
+            width: 100%;
+            justify-content: center;
+}
+
+        .results-table{
+            /* margin: 20px auto; */
             border-collapse: collapse;
-            width: 80%;
+            min-width: 500px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             border-radius: 10px;
+            overflow: hidden;
             /* overflow-y: scroll;
             overflow-x: scroll; */
             opacity: 0; 
@@ -67,30 +82,31 @@
             transition: all 0.5s ease-in-out;
         }
 
-        #results.show{
+        .results-table.show{
             opacity: 1;
             transform: translateY(0);
         }
 
-        #results th, #results td{
+        .results-table th, .results-table td{
             border: 1px solid #ddd;
             padding: 12px;
+            text-align: center;
         }
 
-        #results th{
+        .results-table th{
             background-color: #ef9185;
             color: white;
         }
 
-        #results tr:nth-child(even){
+        .results-table tr:nth-child(even){
             background-color: #dbdedf;
         }
 
-        #results tr:nth-child(odd){
+        .results-table tr:nth-child(odd){
             background-color: white;
         }
 
-        #results tr:hover{
+        .results-table tr:hover{
             background-color: #f1f1f1;
         }
 
@@ -99,22 +115,24 @@
             /* border: 2px solid black; */
             border-radius: 10px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
             margin: 10px;
             padding: 10px;
-            height: 368px;
-            width: 260px;
-            flex-wrap: wrap;
-            align-content: space-around;
-            justify-content: space-evenly;
-            position: relative;
-            z-index: 0;
+            gap: 15px;
+            /* height: 50px; */
+            width: fit-content;
+            /* flex-wrap: wrap; */
+            top: 20px;
+            /* align-content: space-around; */
+            /* justify-content: space-evenly; */
+            /* position: fixed; */
+            z-index: 10;
             overflow: visible;
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
         }
 
-        /* CSS */
+        
         .button-56 {
         align-items: center;
         background-color: #fee6e3;
@@ -179,24 +197,34 @@
 
 </head>
 <body>
-    <div class="card">
+    <span class="card">
         <label>Start Date</label>
         <input type="date" id="start_date">
         <label>End Date</label>
         <input type="date" id="end_date">
         <button onclick="fetchReports()" class="button-56" role="button">Submit</button>
         
-    </div>
+    </span>
     
-    <div class="container">
-        
-        <h2>Results:</h2>
-        <table id="results">
-            <thead>
-                <tr><th>Name</th><th>Date</th><th>Value</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <div class="container" id="results-container">
+        <div class="tables-wrapper">
+
+            <!-- <h2>Results:</h2> -->
+            <table id="results1" class="results-table">
+                <thead>
+                    <tr><th>Name</th><th>Date</th><th>Value</th><th>Price</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <table id="results2" class="results-table">
+                <thead>
+                    <tr><th>Product</th><th>Date2</th><th>Value2</th><th>Rate</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+        </div>
         
     </div>
 
@@ -209,20 +237,37 @@
                 .then(res => res.json())
                 .then(data => {
                     // const container = document.getElementsByClassName("conatainer")
-                    const container = document.querySelector(".container");
-                    const table = document.getElementById("results");
-                    const tbody = table.querySelector("#results tbody");
-                    tbody.innerHTML = "";
-                    data.forEach(item => {
-                        tbody.innerHTML += `<tr>
+                    const container = document.getElementById("results-container");
+                    const tbody1 = document.querySelector("#results1 tbody");
+                    const tbody2 = document.querySelector("#results2 tbody");
+                    // tbody.innerHTML = "";
+                    
+                    tbody1.innerHTML = "";
+                    tbody2.innerHTML = "";
+
+                    
+                    data.table1.forEach(item => {
+                        tbody1.innerHTML += `<tr>
                             <td>${item.name}</td>
                             <td>${item.date}</td>
                             <td>${item.value}</td>
+                            <td>${item.price}</td>
                         </tr>`;
                     });
+
+                    data.table2.forEach(item => {
+                        tbody2.innerHTML += `<tr>
+                            <td>${item.product}</td>
+                            <td>${item.date2}</td>
+                            <td>${item.value2}</td>
+                            <td>${item.rate}</td>
+                        </tr>`;
+                    });
+
+
                     
                     container.classList.add("show");
-                    table.classList.add("show");
+                    document.querySelectorAll(".results-table").forEach(tbl => tbl.classList.add("show"));
 
                 });
         }
