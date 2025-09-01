@@ -248,27 +248,9 @@
                     tbody1.innerHTML = "";
                     tbody2.innerHTML = "";
 
-                    
-                    // data.table1.forEach(item => {
-                    //     tbody1.innerHTML += `<tr>
-                    //         <td>${item.name}</td>
-                    //         <td>${item.date}</td>
-                    //         <td>${item.value}</td>
-                    //         <td>${item.price}</td>
-                    //     </tr>`;
-                    // });
-
-                    // data.table2.forEach(item => {
-                    //     tbody2.innerHTML += `<tr>
-                    //         <td>${item.product}</td>
-                    //         <td>${item.date2}</td>
-                    //         <td>${item.value2}</td>
-                    //         <td>${item.rate}</td>
-                    //     </tr>`;
-                    // });
 
                     if (data.table1) {
-                        table1.style.display = "table";  // show table
+                        table1.style.display = "table";
                         data.table1.forEach(item => {
                             tbody1.innerHTML += `<tr>
                                 <td>${item.name}</td>
@@ -278,10 +260,9 @@
                             </tr>`;
                         });
                     } else {
-                        table1.style.display = "none";   // hide table if no data
+                        table1.style.display = "none";   
                     }
 
-                    // Handle table2 (Products)
                     if (data.table2) {
                         table2.style.display = "table";
                         data.table2.forEach(item => {
