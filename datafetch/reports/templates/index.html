@@ -25,7 +25,7 @@
             padding: 25px;
             display: flex;
             /* flex-wrap: wrap; */
-            flex-direction: row;
+            flex-direction: column;
             /* height: 400px; */
             gap: 20px;
             width: 90%;
@@ -190,7 +190,15 @@
         .button-56 {
             padding: 0 40px;
         }
-        }            
+        }      
+
+        .no-data {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: bold;
+            padding: 20px;
+        }
 
     </style>
 
@@ -228,70 +236,83 @@
         
     </div>
 
-    <script>
-        function fetchReports() {
-            const start = document.getElementById("start_date").value;
-            const end = document.getElementById("end_date").value;
+<script>
+    function fetchReports() {
+        const start = document.getElementById("start_date").value;
+        const end = document.getElementById("end_date").value;
 
-            fetch(`/api/reports/?start_date=${start}&end_date=${end}`)
-                .then(res => res.json())
-                .then(data => {
-                    // const container = document.getElementsByClassName("conatainer")
-                    
-                    const container = document.getElementById("results-container");
-                    const table1 = document.getElementById("results1");
-                    const table2 = document.getElementById("results2");
-                    const tbody1 = document.querySelector("#results1 tbody");
-                    const tbody2 = document.querySelector("#results2 tbody");
-                    // tbody.innerHTML = "";
-                    
-                    tbody1.innerHTML = "";
-                    tbody2.innerHTML = "";
+        fetch(`/api/reports/?start_date=${start}&end_date=${end}`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById("results-container");
+                const table1 = document.getElementById("results1");
+                const table2 = document.getElementById("results2");
+                const tbody1 = document.querySelector("#results1 tbody");
+                const tbody2 = document.querySelector("#results2 tbody");
 
+                // Clear old data
+                tbody1.innerHTML = "";
+                tbody2.innerHTML = "";
+                let hasData = false;
 
-                    if (data.table1) {
-                        table1.style.display = "table";
-                        data.table1.forEach(item => {
-                            tbody1.innerHTML += `<tr>
-                                <td>${item.name}</td>
-                                <td>${item.date}</td>
-                                <td>${item.value}</td>
-                                <td>${item.price}</td>
-                            </tr>`;
-                        });
-                    } else {
-                        table1.style.display = "none";   
-                    }
+                // Remove any old "no data" message
+                const oldMsg = container.querySelector(".no-data");
+                if (oldMsg) oldMsg.remove();
 
-                    if (data.table2) {
-                        table2.style.display = "table";
-                        data.table2.forEach(item => {
-                            tbody2.innerHTML += `<tr>
-                                <td>${item.product}</td>
-                                <td>${item.date2}</td>
-                                <td>${item.value2}</td>
-                                <td>${item.rate}</td>
-                            </tr>`;
-                        });
-                    } else {
-                        table2.style.display = "none";
-                    }                        
+                // Table 1
+                if (data.table1 && data.table1.length > 0) {
+                    table1.style.display = "table";
+                    hasData = true;
+                    data.table1.forEach(item => {
+                        tbody1.innerHTML += `<tr>
+                            <td>${item.name}</td>
+                            <td>${item.date}</td>
+                            <td>${item.value}</td>
+                            <td>${item.price}</td>
+                        </tr>`;
+                    });
+                } else {
+                    table1.style.display = "none";
+                }
 
+                // Table 2
+                if (data.table2 && data.table2.length > 0) {
+                    table2.style.display = "table";
+                    hasData = true;
+                    data.table2.forEach(item => {
+                        tbody2.innerHTML += `<tr>
+                            <td>${item.product}</td>
+                            <td>${item.date2}</td>
+                            <td>${item.value2}</td>
+                            <td>${item.rate}</td>
+                        </tr>`;
+                    });
+                } else {
+                    table2.style.display = "none";
+                }
 
-
-
-
-
-
-
-
-                    
+                // Show or hide container
+                if (!hasData) {
                     container.classList.add("show");
-                    document.querySelectorAll(".results-table").forEach(tbl => tbl.classList.add("show"));
+                    container.innerHTML += `<p class="no-data">No Data Found!</p>`;
+                } else {
+                    container.classList.add("show");
+                    document.querySelectorAll(".results-table").forEach(tbl => {
+                        if (tbl.style.display === "table") {
+                            tbl.classList.add("show");
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                const container = document.getElementById("results-container");
+                container.innerHTML = `<p class="no-data">Error fetching data</p>`;
+                container.classList.add("show");
+            });
+    }
+</script>
 
-                });
-        }
-    </script>
 
 
 </body>
