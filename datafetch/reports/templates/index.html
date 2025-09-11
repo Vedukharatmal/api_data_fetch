@@ -236,83 +236,169 @@
         
     </div>
 
+
+
 <script>
-    function fetchReports() {
-        const start = document.getElementById("start_date").value;
-        const end = document.getElementById("end_date").value;
+// function fetchReports() {
+//     const start = document.getElementById("start_date").value;
+//     const end = document.getElementById("end_date").value;
+//     const container = document.getElementById("results-container");
 
-        fetch(`/api/reports/?start_date=${start}&end_date=${end}`)
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById("results-container");
-                const table1 = document.getElementById("results1");
-                const table2 = document.getElementById("results2");
-                const tbody1 = document.querySelector("#results1 tbody");
-                const tbody2 = document.querySelector("#results2 tbody");
+//     // Show loading
+//     container.innerHTML = `<p class="no-data">Loading...</p>`;
+//     container.classList.add("show");
 
-                // Clear old data
-                tbody1.innerHTML = "";
-                tbody2.innerHTML = "";
-                let hasData = false;
+//     fetch(`/api/reports/?start_date=${start}&end_date=${end}`)
+//         .then(res => res.json())
+//         .then(data => {
+//             container.innerHTML = ""; // clear loading message
 
-                // Remove any old "no data" message
-                const oldMsg = container.querySelector(".no-data");
-                if (oldMsg) oldMsg.remove();
+//             if (!data.tables || data.tables.length === 0) {
+//                 container.innerHTML = `<p class="no-data">No Data Found!</p>`;
+//                 return;
+//             }
 
-                // Table 1
-                if (data.table1 && data.table1.length > 0) {
-                    table1.style.display = "table";
-                    hasData = true;
-                    data.table1.forEach(item => {
-                        tbody1.innerHTML += `<tr>
-                            <td>${item.name}</td>
-                            <td>${item.date}</td>
-                            <td>${item.value}</td>
-                            <td>${item.price}</td>
-                        </tr>`;
-                    });
-                } else {
-                    table1.style.display = "none";
-                }
+//             const wrapper = document.createElement("div");
+//             wrapper.className = "tables-wrapper";
+//             container.appendChild(wrapper);
 
-                // Table 2
-                if (data.table2 && data.table2.length > 0) {
-                    table2.style.display = "table";
-                    hasData = true;
-                    data.table2.forEach(item => {
-                        tbody2.innerHTML += `<tr>
-                            <td>${item.product}</td>
-                            <td>${item.date2}</td>
-                            <td>${item.value2}</td>
-                            <td>${item.rate}</td>
-                        </tr>`;
-                    });
-                } else {
-                    table2.style.display = "none";
-                }
+//             data.tables.forEach(tableData => {
+//                 // Table Card Wrapper
+//                 const tableCard = document.createElement("div");
+//                 tableCard.style.display = "flex";
+//                 tableCard.style.flexDirection = "column";
+//                 tableCard.style.alignItems = "center";
 
-                // Show or hide container
-                if (!hasData) {
-                    container.classList.add("show");
-                    container.innerHTML += `<p class="no-data">No Data Found!</p>`;
-                } else {
-                    container.classList.add("show");
-                    document.querySelectorAll(".results-table").forEach(tbl => {
-                        if (tbl.style.display === "table") {
-                            tbl.classList.add("show");
-                        }
-                    });
-                }
-            })
-            .catch(err => {
-                console.error("Fetch error:", err);
-                const container = document.getElementById("results-container");
-                container.innerHTML = `<p class="no-data">Error fetching data</p>`;
-                container.classList.add("show");
+//                 // Title
+//                 const title = document.createElement("h3");
+//                 title.innerText = tableData.name;
+//                 title.style.marginBottom = "10px";
+//                 tableCard.appendChild(title);
+
+//                 // Table
+//                 const table = document.createElement("table");
+//                 table.className = "results-table show";
+
+//                 // Header
+//                 const thead = document.createElement("thead");
+//                 const headerRow = document.createElement("tr");
+//                 tableData.columns.forEach(col => {
+//                     const th = document.createElement("th");
+//                     th.innerText = col;
+//                     headerRow.appendChild(th);
+//                 });
+//                 thead.appendChild(headerRow);
+//                 table.appendChild(thead);
+
+//                 // Body
+//                 const tbody = document.createElement("tbody");
+//                 tableData.rows.forEach(row => {
+//                     const tr = document.createElement("tr");
+//                     row.forEach(val => {
+//                         const td = document.createElement("td");
+//                         td.innerText = val;
+//                         tr.appendChild(td);
+//                     });
+//                     tbody.appendChild(tr);
+//                 });
+//                 table.appendChild(tbody);
+
+//                 // Add to wrapper
+//                 tableCard.appendChild(table);
+//                 wrapper.appendChild(tableCard);
+//             });
+//         })
+//         .catch(err => {
+//             console.error("Fetch error:", err);
+//             container.innerHTML = `<p class="no-data">Error fetching data</p>`;
+//         });
+// }
+
+
+
+async function fetchReports() {
+    const start = document.getElementById("start_date").value;
+    const end = document.getElementById("end_date").value;
+    const container = document.getElementById("results-container");
+
+    // Show loading
+    container.innerHTML = `<p class="no-data">Loading...</p>`;
+    container.classList.add("show");
+
+    try {
+        // Step 1: Ask Django for the API endpoint from Excel
+        let res = await fetch("/api/get-endpoint/");
+        let endpointData = await res.json();
+
+        if (!endpointData.endpoint) {
+            container.innerHTML = `<p class="no-data">Error: API endpoint not found</p>`;
+            return;
+        }
+
+        // Step 2: Use the endpoint from Excel to fetch reports
+        let reportsRes = await fetch(`${endpointData.endpoint}?start_date=${start}&end_date=${end}`);
+        let data = await reportsRes.json();
+
+        container.innerHTML = ""; // clear loading message
+
+        if (!data.tables || data.tables.length === 0) {
+            container.innerHTML = `<p class="no-data">No Data Found!</p>`;
+            return;
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "tables-wrapper";
+        container.appendChild(wrapper);
+
+        data.tables.forEach(tableData => {
+            const tableCard = document.createElement("div");
+            tableCard.style.display = "flex";
+            tableCard.style.flexDirection = "column";
+            tableCard.style.alignItems = "center";
+
+            const title = document.createElement("h3");
+            title.innerText = tableData.name;
+            title.style.marginBottom = "10px";
+            tableCard.appendChild(title);
+
+            const table = document.createElement("table");
+            table.className = "results-table show";
+
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            tableData.columns.forEach(col => {
+                const th = document.createElement("th");
+                th.innerText = col;
+                headerRow.appendChild(th);
             });
-    }
-</script>
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
 
+            const tbody = document.createElement("tbody");
+            tableData.rows.forEach(row => {
+                const tr = document.createElement("tr");
+                row.forEach(val => {
+                    const td = document.createElement("td");
+                    td.innerText = val;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            tableCard.appendChild(table);
+            wrapper.appendChild(tableCard);
+        });
+    } catch (err) {
+        console.error("Fetch error:", err);
+        container.innerHTML = `<p class="no-data">Error fetching data</p>`;
+    }
+}
+
+
+
+
+</script>
 
 
 </body>
